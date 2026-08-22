@@ -9,11 +9,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 @ApplicationScoped
 public class TeamService {
 
     @Inject
     TeamRepository teamRepository;
+
+    @ConfigProperty(name = "teamboard.max-team-size", defaultValue = "10")
+    int maxTeamSize;
 
     public List<Team> getAllTeams() {
         return teamRepository.findAll();
@@ -36,6 +41,10 @@ public class TeamService {
 
         if (!team.getOwnerId().equals(requesterId)) {
             throw new IllegalArgumentException("Only the team owner can add members");
+        }
+
+        if (team.getMemberIds().size() >= maxTeamSize) {
+            throw new IllegalArgumentException("Team has reached the maximum size of " + maxTeamSize);
         }
 
         team.getMemberIds().add(memberId);
