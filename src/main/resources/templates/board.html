@@ -1,0 +1,95 @@
+{#include base.html}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Board for {project.name}</h2>
+        <a href="/ui/teams/{project.teamId}/projects" class="btn btn-secondary btn-sm">Back to Projects</a>
+    </div>
+
+    <!-- Hidden input to store requesterId for HTMX calls -->
+    <input type="hidden" id="requesterId" value="{requesterId}">
+
+    <div class="row">
+        <!-- ASSIGNED Column -->
+        <div class="col-md-4">
+            <h4 class="text-center">Assigned</h4>
+            <div class="column" id="col-ASSIGNED">
+                {#for task in tasks}
+                    {#if task.status.name() == 'ASSIGNED'}
+                    <div class="card task-card mb-2 p-2 shadow-sm" id="task-{task.id}">
+                        <h6>{task.title}</h6>
+                        <small>{task.description}</small>
+                        <hr class="my-2">
+                        <small class="text-muted">Assigned: {task.assignedUserId}</small>
+                        <div class="mt-2">
+                            <button class="btn btn-outline-primary btn-sm" 
+                                    hx-patch="/tasks/{task.id}/status" 
+                                    hx-headers='\{"X-User-Id": "{requesterId}", "Content-Type": "application/json"\}'
+                                    hx-ext="json-enc"
+                                    hx-vals='\{"status": "IN_PROGRESS"\}'
+                                    hx-swap="none"
+                                    onclick="setTimeout(() => window.location.reload(), 200)">Start</button>
+                        </div>
+                    </div>
+                    {/if}
+                {/for}
+            </div>
+        </div>
+
+        <!-- IN_PROGRESS Column -->
+        <div class="col-md-4">
+            <h4 class="text-center">In Progress</h4>
+            <div class="column" id="col-IN_PROGRESS">
+                {#for task in tasks}
+                    {#if task.status.name() == 'IN_PROGRESS'}
+                    <div class="card task-card mb-2 p-2 shadow-sm" id="task-{task.id}">
+                        <h6>{task.title}</h6>
+                        <small>{task.description}</small>
+                        <hr class="my-2">
+                        <small class="text-muted">Assigned: {task.assignedUserId}</small>
+                        <div class="mt-2">
+                            <button class="btn btn-outline-success btn-sm" 
+                                    hx-patch="/tasks/{task.id}/status" 
+                                    hx-headers='\{"X-User-Id": "{requesterId}", "Content-Type": "application/json"\}'
+                                    hx-ext="json-enc"
+                                    hx-vals='\{"status": "COMPLETED"\}'
+                                    hx-swap="none"
+                                    onclick="setTimeout(() => window.location.reload(), 200)">Complete</button>
+                        </div>
+                    </div>
+                    {/if}
+                {/for}
+            </div>
+        </div>
+
+        <!-- COMPLETED Column -->
+        <div class="col-md-4">
+            <h4 class="text-center">Completed</h4>
+            <div class="column" id="col-COMPLETED">
+                {#for task in tasks}
+                    {#if task.status.name() == 'COMPLETED'}
+                    <div class="card task-card mb-2 p-2 shadow-sm text-muted bg-light" id="task-{task.id}">
+                        <h6><del>{task.title}</del></h6>
+                        <small>{task.description}</small>
+                        <hr class="my-2">
+                        <small class="text-muted">Assigned: {task.assignedUserId}</small>
+                    </div>
+                    {/if}
+                {/for}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Custom htmx extension to encode parameters as JSON body
+        htmx.defineExtension('json-enc', {
+            onEvent: function (name, evt) {
+                if (name === "htmx:configRequest") {
+                    evt.detail.headers['Content-Type'] = "application/json";
+                }
+            },
+            encodeParameters: function(xhr, parameters, elt) {
+                xhr.overrideMimeType('text/json');
+                return (JSON.stringify(parameters));
+            }
+        });
+    </script>
+{/include}

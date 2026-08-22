@@ -1,0 +1,24 @@
+{#include base.html}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Projects for Team {teamId}</h2>
+        <a href="/ui/teams" class="btn btn-secondary btn-sm">Back to Teams</a>
+    </div>
+    
+    <div class="row">
+        {#for project in projects}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{project.name}</h5>
+                    <a href="/ui/projects/{project.id}/board?teamId={teamId}&requesterId={team.ownerId}" class="btn btn-success btn-sm">Open Board</a>
+                </div>
+            </div>
+        </div>
+        {/for}
+        {#if projects.isEmpty()}
+        <div class="col-12">
+            <div class="alert alert-info">No projects found for this team.</div>
+        </div>
+        {/if}
+    </div>
+{/include}
